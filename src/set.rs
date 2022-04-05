@@ -569,6 +569,35 @@ mod test {
     use sapling_crypto::poseidon::bn256::Bn256PoseidonParams;
     use sapling_crypto::group_hash::Keccak256Hasher;
 
+    #[test]
+    fn test_groth16() {
+        use rand::thread_rng;
+        use sapling_crypto::bellman::groth16::{
+            generate_random_parameters,
+        };
+
+        let rng = &mut thread_rng();
+        let circuit = SetBench::<Bn256, NaiveExpSet<RsaGroup>> {
+            inputs: None,
+                    params: SetBenchParams {
+                        group: RsaGroup {
+                            g: BigUint::from(2usize),
+                            m: BigUint::from_str(RSA_512).unwrap(),
+                        },
+                        limb_width: 32,
+                        n_bits_elem: 128,
+                        n_bits_challenge: 128,
+                        n_bits_base: 512,
+                        item_size: 5,
+                        n_inserts: 1,
+                        n_removes: 1,
+                        hash: Rc::new(Bn256PoseidonParams::new::<Keccak256Hasher>()),
+                    }
+                };
+        let p = generate_random_parameters(circuit, rng);
+        print!("{}", p.is_ok());
+    }
+
     circuit_tests! {
         small_rsa_1_swap: (SetBench {
             inputs: Some(SetBenchInputs::new(
